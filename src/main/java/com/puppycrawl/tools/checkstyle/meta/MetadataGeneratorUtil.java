@@ -46,11 +46,11 @@ public final class MetadataGeneratorUtil {
     /**
      * Generate metadata from the module source files available in the input argument path.
      *
-     * @param args arguments
+     * @param args arguments, List moduleFolders
      * @throws IOException ioException
      * @throws CheckstyleException checkstyleException
      */
-    public static void generate(String... args) throws IOException, CheckstyleException {
+    public static void generate(String... args, List<String> moduleFolders) throws IOException, CheckstyleException {
         final Checker checker = new Checker();
         checker.setModuleClassLoader(Checker.class.getClassLoader());
         final DefaultConfiguration scraperCheckConfig =
@@ -62,7 +62,7 @@ public final class MetadataGeneratorUtil {
         defaultConfiguration.addChild(treeWalkerConfig);
         treeWalkerConfig.addChild(scraperCheckConfig);
         checker.configure(defaultConfiguration);
-        dumpMetadata(checker, args[0]);
+        dumpMetadata(checker, args[0], moduleFolders);
     }
 
     /**
