@@ -2334,7 +2334,7 @@ public final class TokenTypes {
      *
      * @see #METHOD_REF
      */
-    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
+  
     /**
      * The {@code if} keyword.
      *
@@ -5726,5 +5726,46 @@ public final class TokenTypes {
     /** Prevent instantiation. */
     private TokenTypes() {
     }
+    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
+
+    /**
+     * A separator. 
+     * It is used for method reference
+     * 
+     * <p>For example:</p>
+     * <pre>
+     * public class AST_Test {
+     * 	 static void shape(){}
+     *   public static void main(String[] args) {
+     *	     Runnable s2 = AST_Test::shape;
+     * 	     s2.run();
+     *	}
+     *	}
+     * </pre>
+     * <p>parses as:</p>
+     * <pre>
+     * VARIABLE_DEF-&gt; VARIABLE_DEF
+     * |--MODIFIERS -&gt; MODIFIERS
+     * |--TYPE -&gt; TYPE
+     * |   `--IDENT -&gt; Runnable
+     * |--IDENT -&gt; s2
+     * `--ASSIGN -&gt; =
+     *	   `--EXPR -&gt; EXPR
+     *	       `--METHOD_REF -&gt; ::
+     *     	   |--IDENT -&gt; AST_Test
+     *             `--IDENT -&gt; shape
+     *	SEMI -&gt; ;
+     * </pre>
+     *
+     * @see #EXPR
+     * @see #MODIFIERS
+     * @see #TYPE
+     * @see #IDENT
+     * @see #ASSIGN
+     * @see #SEMI
+     * @see #VARIABLE_DEF
+     * @see #METHOD_REF
+     * @since 8
+     **/
 
 }
