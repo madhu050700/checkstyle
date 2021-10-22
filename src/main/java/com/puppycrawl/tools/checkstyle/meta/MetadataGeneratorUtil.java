@@ -73,14 +73,14 @@ public final class MetadataGeneratorUtil {
      * @throws CheckstyleException checkstyleException
      * @throws IOException ioException
      */
-    private static void dumpMetadata(Checker checker, String path) throws CheckstyleException,
+    private static void dumpMetadata(Checker checker, String path, List<String> folders) throws CheckstyleException,
             IOException {
         final List<File> validFiles = new ArrayList<>();
         if (path.endsWith(".java")) {
             validFiles.add(new File(path));
         }
         else {
-            final List<String> moduleFolders = Arrays.asList("checks", "filters", "filefilters");
+            final List<String> moduleFolders = folders;
             for (String folder : moduleFolders) {
                 try (Stream<Path> files = Files.walk(Paths.get(path
                         + "/" + folder))) {
