@@ -186,6 +186,11 @@ public final class XmlMetaWriter {
             final StreamResult result = new StreamResult(new File(modifiedPath));
             transformer.transform(source, result);
         }
+        else 
+        {
+        	System.out.println("Error - Description of module details cannot be accessed");
+        }
+        }
     }
 }
 
