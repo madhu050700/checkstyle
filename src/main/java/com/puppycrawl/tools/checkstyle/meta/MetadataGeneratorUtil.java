@@ -50,7 +50,7 @@ public final class MetadataGeneratorUtil {
      * @throws IOException ioException
      * @throws CheckstyleException checkstyleException
      */
-    public static void generate(String... args, List<String> moduleFolders) throws IOException, CheckstyleException {
+    public static void generate(List<String> moduleFolders, String... args) throws IOException, CheckstyleException {
         final Checker checker = new Checker();
         checker.setModuleClassLoader(Checker.class.getClassLoader());
         final DefaultConfiguration scraperCheckConfig =
