@@ -1,0 +1,363 @@
+From da31e6f965ebee5d7b7bf9a3e0771343138aef84 Mon Sep 17 00:00:00 2001
+From: madhu050700 <madhumithas0507@gmail.com>
+Date: Fri, 22 Oct 2021 00:15:52 -0700
+Subject: [PATCH 18/23] Added the modified versions of the files solving the
+ relevant issues
+
+---
+ .../tools/checkstyle/api/TokenTypes.java      | 43 ++++++++++++++++++-
+ .../modifier/RedundantModifierCheck.java      | 24 ++++++++++-
+ .../whitespace/NoWhitespaceAfterCheck.java    | 22 ++++++++++
+ .../modifier/RedundantModifierCheck.xml       |  9 +++-
+ .../javadoc/SummaryJavadocCheckTest.java      |  2 +-
+ .../modifier/RedundantModifierCheckTest.java  | 21 +++++++++
+ .../checkstyle/internal/AllChecksTest.java    |  3 ++
+ ...undantModifierWithStrictfpAsRedundant.java | 29 +++++++++++++
+ src/xdocs/config_modifier.xml                 |  9 ++++
+ src/xdocs/config_whitespace.xml               | 22 ++++++++++
+ 10 files changed, 179 insertions(+), 5 deletions(-)
+ create mode 100644 src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/checks/modifier/redundantmodifier/InputRedundantModifierWithStrictfpAsRedundant.java
+
+diff --git a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+index 430fc4cac5..7b9661da7c 100644
+--- a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
++++ b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+@@ -2334,7 +2334,7 @@ public final class TokenTypes {
+      *
+      * @see #METHOD_REF
+      */
+-    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
++  
+     /**
+      * The {@code if} keyword.
+      *
+@@ -5726,5 +5726,46 @@ public final class TokenTypes {
+     /** Prevent instantiation. */
+     private TokenTypes() {
+     }
++    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
++
++    /**
++     * A separator. 
++     * It is used for method reference
++     * 
++     * <p>For example:</p>
++     * <pre>
++     * public class AST_Test {
++     * 	 static void shape(){}
++     *   public static void main(String[] args) {
++     *	     Runnable s2 = AST_Test::shape;
++     * 	     s2.run();
++     *	}
++     *	}
++     * </pre>
++     * <p>parses as:</p>
++     * <pre>
++     * VARIABLE_DEF-&gt; VARIABLE_DEF
++     * |--MODIFIERS -&gt; MODIFIERS
++     * |--TYPE -&gt; TYPE
++     * |   `--IDENT -&gt; Runnable
++     * |--IDENT -&gt; s2
++     * `--ASSIGN -&gt; =
++     *	   `--EXPR -&gt; EXPR
++     *	       `--METHOD_REF -&gt; ::
++     *     	   |--IDENT -&gt; AST_Test
++     *             `--IDENT -&gt; shape
++     *	SEMI -&gt; ;
++     * </pre>
++     *
++     * @see #EXPR
++     * @see #MODIFIERS
++     * @see #TYPE
++     * @see #IDENT
++     * @see #ASSIGN
++     * @see #SEMI
++     * @see #VARIABLE_DEF
++     * @see #METHOD_REF
++     * @since 8
++     **/
+ 
+ }
+diff --git a/src/main/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheck.java b/src/main/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheck.java
+index 28ca07ae37..7161353e49 100644
+--- a/src/main/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheck.java
++++ b/src/main/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheck.java
+@@ -134,6 +134,13 @@ import com.puppycrawl.tools.checkstyle.utils.TokenUtil;
+  *   ProtectedInnerClass pc = new ProtectedInnerClass();
+  * }
+  * </pre>
++ * <p>
++ * Starting from Java 17, all floating point operations remain consistently strict,
++ * see <a href="https://openjdk.java.net/jeps/306">JEP 306</a>. Hence,
++ * <a href="apidocs/com/puppycrawl/tools/checkstyle/api/TokenTypes.html#STRICTFP">
++ * STRICTFP</a> as been added to the list of acceptable tokens, and when added into the
++ * check configuration, it shows all {@code strictfp} tokens as violations.
++ * </p>
+  * <ul>
+  * <li>
+  * Property {@code tokens} - tokens to check
+@@ -206,7 +213,16 @@ public class RedundantModifierCheck
+ 
+     @Override
+     public int[] getDefaultTokens() {
+-        return getAcceptableTokens();
++        return new int[] {
++            TokenTypes.METHOD_DEF,
++            TokenTypes.VARIABLE_DEF,
++            TokenTypes.ANNOTATION_FIELD_DEF,
++            TokenTypes.INTERFACE_DEF,
++            TokenTypes.CTOR_DEF,
++            TokenTypes.CLASS_DEF,
++            TokenTypes.ENUM_DEF,
++            TokenTypes.RESOURCE,
++        };
+     }
+ 
+     @Override
+@@ -225,12 +241,16 @@ public class RedundantModifierCheck
+             TokenTypes.CLASS_DEF,
+             TokenTypes.ENUM_DEF,
+             TokenTypes.RESOURCE,
++	    TokenTypes.STRICTFP,
+         };
+     }
+ 
+     @Override
+     public void visitToken(DetailAST ast) {
+-        if (ast.getType() == TokenTypes.INTERFACE_DEF) {
++	if (ast.getType() == TokenTypes.STRICTFP) {
++            log(ast, MSG_KEY, ast.getText());
++        }
++        else if (ast.getType() == TokenTypes.INTERFACE_DEF) {
+             checkInterfaceModifiers(ast);
+         }
+         else if (ast.getType() == TokenTypes.ENUM_DEF) {
+diff --git a/src/main/java/com/puppycrawl/tools/checkstyle/checks/whitespace/NoWhitespaceAfterCheck.java b/src/main/java/com/puppycrawl/tools/checkstyle/checks/whitespace/NoWhitespaceAfterCheck.java
+index 691cc08a44..15a7dc6a8b 100644
+--- a/src/main/java/com/puppycrawl/tools/checkstyle/checks/whitespace/NoWhitespaceAfterCheck.java
++++ b/src/main/java/com/puppycrawl/tools/checkstyle/checks/whitespace/NoWhitespaceAfterCheck.java
+@@ -91,6 +91,17 @@ import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
+  * <pre>
+  * &lt;module name=&quot;NoWhitespaceAfter&quot;/&gt;
+  * </pre>
++ * <p>
++ * Example:
++ * </p>
++ * <pre>
++ *  int array[]; //OK
++ *  int array1 [];//violation, whitespace between arrayname and opening bracket [
++ *  array = new int[10];//OK
++ *  System.//OK
++ *  out.//OK
++ *  println("BYE");
++ * </pre>
+  * <p>To configure the check to forbid linebreaks after a DOT token:
+  * </p>
+  * <pre>
+@@ -100,6 +111,17 @@ import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
+  * &lt;/module&gt;
+  * </pre>
+  * <p>
++ * Example:
++ * </p>
++ * <pre>
++ *  int array[]; //OK
++ *  int array1 [];//OK
++ *  array = new int[10];//OK
++ *  System.//violation, line breaking is not allowed
++ *  out.// violation, line breaking is not allowed 
++ *  println("BYE");
++ * </pre>
++ * <p>
+  * If the annotation is between the type and the array, the check will skip validation for spaces:
+  * </p>
+  * <pre>
+diff --git a/src/main/resources/com/puppycrawl/tools/checkstyle/meta/checks/modifier/RedundantModifierCheck.xml b/src/main/resources/com/puppycrawl/tools/checkstyle/meta/checks/modifier/RedundantModifierCheck.xml
+index a5023e5156..7d7c652b33 100644
+--- a/src/main/resources/com/puppycrawl/tools/checkstyle/meta/checks/modifier/RedundantModifierCheck.xml
++++ b/src/main/resources/com/puppycrawl/tools/checkstyle/meta/checks/modifier/RedundantModifierCheck.xml
+@@ -106,7 +106,14 @@
+  public class ClassExtending extends ClassExample {
+    ProtectedInnerClass pc = new ProtectedInnerClass();
+  }
+- &lt;/pre&gt;</description>
++ &lt;/pre&gt;
++ &lt;p&gt;
++ Starting from Java 17, all floating point operations remain consistently strict,
++ see &lt;a href="https://openjdk.java.net/jeps/306"&gt;JEP 306&lt;/a&gt;. Hence,
++ &lt;a href="apidocs/com/puppycrawl/tools/checkstyle/api/TokenTypes.html#STRICTFP"&gt;
++ STRICTFP&lt;/a&gt; as been added to the list of acceptable tokens, and when added into the
++ check configuration, it shows all {@code strictfp} tokens as violations.
++ &lt;/p&gt;</description>
+          <properties>
+             <property default-value="METHOD_DEF,VARIABLE_DEF,ANNOTATION_FIELD_DEF,INTERFACE_DEF,CTOR_DEF,CLASS_DEF,ENUM_DEF,RESOURCE"
+                       name="tokens"
+diff --git a/src/test/java/com/puppycrawl/tools/checkstyle/checks/javadoc/SummaryJavadocCheckTest.java b/src/test/java/com/puppycrawl/tools/checkstyle/checks/javadoc/SummaryJavadocCheckTest.java
+index 964d9e19fb..cfdf32c85c 100644
+--- a/src/test/java/com/puppycrawl/tools/checkstyle/checks/javadoc/SummaryJavadocCheckTest.java
++++ b/src/test/java/com/puppycrawl/tools/checkstyle/checks/javadoc/SummaryJavadocCheckTest.java
+@@ -214,5 +214,5 @@ public class SummaryJavadocCheckTest extends AbstractModuleTestSupport {
+         verifyWithInlineConfigParser(
+                 getPath("inputs/package-info.java"), expected);
+     }
+-
++    
+ }
+diff --git a/src/test/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheckTest.java b/src/test/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheckTest.java
+index dc6d865c7d..b23f95053b 100644
+--- a/src/test/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheckTest.java
++++ b/src/test/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheckTest.java
+@@ -149,6 +149,7 @@ public class RedundantModifierCheckTest
+             TokenTypes.CLASS_DEF,
+             TokenTypes.ENUM_DEF,
+             TokenTypes.RESOURCE,
++	    TokenTypes.STRICTFP,
+         };
+         assertArrayEquals(expected, actual, "Invalid acceptable tokens");
+     }
+@@ -258,5 +259,25 @@ public class RedundantModifierCheckTest
+                 getNonCompilablePath("InputRedundantModifierTryWithResources.java"),
+                 expected);
+     }
++    @Test
++    public void testStrictFpAsRedundant() throws Exception {
++        final String[] expected = {
++            "12:12: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "14:5: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "16:5: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "18:5: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "20:14: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "22:5: " + getCheckMessage(MSG_KEY, "abstract"),
++            "22:14: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "23:9: " + getCheckMessage(MSG_KEY, "public"),
++            "23:16: " + getCheckMessage(MSG_KEY, "static"),
++            "23:23: " + getCheckMessage(MSG_KEY, "strictfp"),
++            "27:9: " + getCheckMessage(MSG_KEY, "final"),
++            "27:15: " + getCheckMessage(MSG_KEY, "strictfp"),
++        };
++
++        verifyWithInlineConfigParser(getNonCompilablePath(
++                "InputRedundantModifierWithStrictfpAsRedundant.java"), expected);
++     }
+ 
+ }
+diff --git a/src/test/java/com/puppycrawl/tools/checkstyle/internal/AllChecksTest.java b/src/test/java/com/puppycrawl/tools/checkstyle/internal/AllChecksTest.java
+index 7e0a9fb07e..6caa87eff2 100644
+--- a/src/test/java/com/puppycrawl/tools/checkstyle/internal/AllChecksTest.java
++++ b/src/test/java/com/puppycrawl/tools/checkstyle/internal/AllChecksTest.java
+@@ -185,6 +185,9 @@ public class AllChecksTest extends AbstractModuleTestSupport {
+                 "ELLIPSIS",
+                 // these are covered by GenericWhitespaceCheck
+                 "WILDCARD_TYPE", "GENERIC_END", "GENERIC_START").collect(Collectors.toSet()));
++	CHECKSTYLE_TOKENS_IN_CONFIG_TO_IGNORE.put("RedundantModifier", Stream.of(
++                // required only for java 17 and above
++                "STRICTFP").collect(Collectors.toSet()));
+ 
+         // google
+         GOOGLE_TOKENS_IN_CONFIG_TO_IGNORE.put("AnnotationLocation", Stream.of(
+diff --git a/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/checks/modifier/redundantmodifier/InputRedundantModifierWithStrictfpAsRedundant.java b/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/checks/modifier/redundantmodifier/InputRedundantModifierWithStrictfpAsRedundant.java
+new file mode 100644
+index 0000000000..844bffd4ee
+--- /dev/null
++++ b/src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/checks/modifier/redundantmodifier/InputRedundantModifierWithStrictfpAsRedundant.java
+@@ -0,0 +1,29 @@
++/*
++RedundantModifier
++tokens = STRICTFP, METHOD_DEF, INTERFACE_DEF, ENUM_DEF,
++
++
++*/
++
++package com.puppycrawl.tools.checkstyle.checks.modifier.redundantmodifier;
++
++//non-compiled with javac: Compilable with Java14
++public class InputRedundantModifierWithStrictfpAsRedundant {
++    public strictfp class Test {} // violation
++
++    strictfp interface MyInterface {} // violation
++
++    strictfp enum MyEnum {} // violation
++
++    strictfp record MyRecord() {} // violation
++
++    abstract strictfp class MyClass {} // violation
++
++    abstract strictfp interface MyStrictFPInterface { // 2 violations
++        public static strictfp enum MyInnerEnum {} // 3 violations
++    }
++
++    final class OtherClass {
++        final strictfp void m1() {} // 2 violations
++    }
++}
+\ No newline at end of file
+diff --git a/src/xdocs/config_modifier.xml b/src/xdocs/config_modifier.xml
+index e85e43eeb5..839619da5f 100644
+--- a/src/xdocs/config_modifier.xml
++++ b/src/xdocs/config_modifier.xml
+@@ -656,6 +656,13 @@ public class ClassExtending extends ClassExample {
+   ProtectedInnerClass pc = new ProtectedInnerClass();
+ }
+         </source>
++	<p>
++	  Starting from Java 17, all floating point operations remain consistently strict,
++          see <a href="https://openjdk.java.net/jeps/306">JEP 306</a>. Hence,
++          <a href="apidocs/com/puppycrawl/tools/checkstyle/api/TokenTypes.html#STRICTFP">
++          STRICTFP</a> as been added to the list of acceptable tokens, and when added into the
++          check configuration, it shows all <code>strictfp</code> tokens as violations.
++        </p>
+       </subsection>
+ 
+       <subsection name="Properties" id="RedundantModifier_Properties">
+@@ -689,6 +696,8 @@ public class ClassExtending extends ClassExample {
+                   ENUM_DEF</a>
+                 , <a href="apidocs/com/puppycrawl/tools/checkstyle/api/TokenTypes.html#RESOURCE">
+                   RESOURCE</a>
++		, <a href="apidocs/com/puppycrawl/tools/checkstyle/api/TokenTypes.html#STRICTFP">
++                  STRICTFP</a>
+                 .
+               </td>
+               <td>
+diff --git a/src/xdocs/config_whitespace.xml b/src/xdocs/config_whitespace.xml
+index f8792a9747..be5a9d107c 100644
+--- a/src/xdocs/config_whitespace.xml
++++ b/src/xdocs/config_whitespace.xml
+@@ -1415,6 +1415,17 @@ import static java.math.BigInteger.ZERO;
+         <source>
+ &lt;module name=&quot;NoWhitespaceAfter&quot;/&gt;
+         </source>
++	<p>
++	  Example:
++	</p>
++	<source>
++int array[]; //OK
++int array1 [];//violation, whitespace between arrayname and opening bracket [
++array = new int[10];//OK
++System.//OK
++out.//OK
++println("BYE");
++	</source>
+ 
+         <p>
+           To configure the check to forbid linebreaks after a DOT token:
+@@ -1425,6 +1436,17 @@ import static java.math.BigInteger.ZERO;
+   &lt;property name=&quot;allowLineBreaks&quot; value=&quot;false&quot;/&gt;
+ &lt;/module&gt;
+         </source>
++	<p>
++	  Example:
++	</p>
++	<source>
++int array[]; //OK
++int array1 [];//OK
++array = new int[10];//OK
++System.//violation, line break is not allowed
++out.//violation, line break is not allowed
++println("BYE");
++	</source>
+         <p>
+          If the annotation is between the type and the array, the check will skip validation for
+          spaces:
+-- 
+2.31.1.windows.1
+
