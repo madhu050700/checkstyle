@@ -1531,7 +1531,7 @@ public final class TokenTypes {
      *
      * <p>For example:</p>
      * <pre>
-     * public byte x;
+     * boolean x  = true;
      * </pre>
      * <p>parses as:</p>
      * <pre>
@@ -1539,7 +1539,7 @@ public final class TokenTypes {
      *  |--MODIFIERS -&gt; MODIFIERS
      *  |   `--LITERAL_PUBLIC -&gt; public
      *  |--TYPE -&gt; TYPE
-     *  |   `--LITERAL_BYTE -&gt; byte
+     *  |   `--LITERAL_BOOLEAN -&gt; byte
      *  |--IDENT -&gt; x
      *  `--SEMI -&gt; ;
      * </pre>
