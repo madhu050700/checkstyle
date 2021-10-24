@@ -5765,7 +5765,6 @@ public final class TokenTypes {
      * @see #SEMI
      * @see #VARIABLE_DEF
      * @see #METHOD_REF
-     *
      * @since 8
      **/
 
