@@ -1,0 +1,26 @@
+First issue of creating the AST of the example
+These are file:
+1) src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Second issue of creating the example of the given configuration file 
+These are the files:
+1) src/main/java/com/puppycrawl/tools/checkstyle/checks/whitespace/NoWhitespaceAfterCheck.java
+2) src/xdocs/config_whitespace.xml
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Third issue of enhancing the given file 
+These are the files:
+1) src/main/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheck.java
+2) src/main/resources/com/puppycrawl/tools/checkstyle/meta/checks/modifier/RedundantModifierCheck.xml
+3) src/test/java/com/puppycrawl/tools/checkstyle/checks/modifier/RedundantModifierCheckTest.java
+4) src/test/java/com/puppycrawl/tools/checkstyle/internal/AllChecksTest.java
+5) src/test/resources-noncompilable/com/puppycrawl/tools/checkstyle/checks/modifier/redundantmodifier/InputRedundantModifierWithStrictfpAsRedundant.java
+6) src/xdocs/config_modifier.xml
+
+
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
