@@ -48,6 +48,17 @@ import com.puppycrawl.tools.checkstyle.api.TokenTypes;
  * &lt;module name="RedundantImport"/&gt;
  * </pre>
  * <p>
+ *  Example:
+ * </p>
+ * <pre>
+ * import java.util.*; // OK
+ * import java.util.Scanner; // violation, Scanner class included in java.util package
+ * import java.io.*; // OK
+ * import java.io.File; // violation, File class included in java.io package
+ * import java.lang.*;  // OK
+ * import java.lang.String   //Redundant import from the java.lang package
+ * </pre>
+ * <p> 
  * Parent is {@code com.puppycrawl.tools.checkstyle.TreeWalker}
  * </p>
  * <p>
