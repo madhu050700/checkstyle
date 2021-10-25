@@ -642,27 +642,29 @@ public final class TokenTypes {
      *
      * <p>For example</p>
      * <pre>
-     * int start, int end
+     * public int parameters(int start, int end){
+     * 
+     * }
      * </pre>
      * <p>parses as:</p>
      * <pre>
-     * +--PARAMETERS
-     *     |
-     *     +--PARAMETER_DEF
-     *         |
-     *         +--MODIFIERS
-     *         +--TYPE
-     *             |
-     *             +--LITERAL_INT (int)
-     *         +--IDENT (start)
-     *     +--COMMA (,)
-     *     +--PARAMETER_DEF
-     *         |
-     *         +--MODIFIERS
-     *         +--TYPE
-     *             |
-     *             +--LITERAL_INT (int)
-     *         +--IDENT (end)
+     * 
+     * --MODIFIERS -&gt; MODIFIERS
+     *  |   `--LITERAL_PUBLIC -&gt; public
+     *  |--TYPE -&gt; TYPE
+     *  |   `--LITERAL_INT -&gt; int 
+     *  --IDENT -&gt; parameters
+     *  |--LPAREN -&gt; (
+     *  |--TYPE -&gt; TYPE
+     *  |    |--LITERAL_INT -&gt; int
+     *  --IDENT -&gt; start
+     *  |--COMMA -&gt; ,
+     *  |--TYPE -&gt; TYPE
+     *  |   |--LITERAL_INT -&gt; int
+     *  |--IDENT -&gt; end
+     *  |--RPAREN -&gt; )
+     *  |--SLIST -&gt; {
+     *  |`--RCURLY -&gt; }
      * </pre>
      *
      * @see #PARAMETER_DEF
@@ -680,30 +682,33 @@ public final class TokenTypes {
      *      void foo(int firstParameter, int... secondParameter) {}
      * </pre>
      * <p>parses as:</p>
-     * <pre>
-     * METHOD_DEF -&gt; METHOD_DEF
-     *     |--MODIFIERS -&gt; MODIFIERS
-     *     |--TYPE -&gt; TYPE
-     *     |   `--LITERAL_VOID -&gt; void
-     *     |--IDENT -&gt; foo
-     *     |--LPAREN -&gt; (
-     *     |--PARAMETERS -&gt; PARAMETERS
-     *     |   |--PARAMETER_DEF -&gt; PARAMETER_DEF
-     *     |   |   |--MODIFIERS -&gt; MODIFIERS
-     *     |   |   |--TYPE -&gt; TYPE
-     *     |   |   |   `--LITERAL_INT -&gt; int
-     *     |   |   `--IDENT -&gt; firstParameter
-     *     |   |--COMMA -&gt; ,
-     *     |   `--PARAMETER_DEF -&gt; PARAMETER_DEF
-     *     |       |--MODIFIERS -&gt; MODIFIERS
-     *     |       |--TYPE -&gt; TYPE
-     *     |       |   `--LITERAL_INT -&gt; int
-     *     |       |--ELLIPSIS -&gt; ...
-     *     |       `--IDENT -&gt; secondParameter
-     *     |--RPAREN -&gt; )
-     *      `--SLIST -&gt; {
-     *          `--RCURLY -&gt; }
-     * </pre>
+     *  <pre>
+731     * LABELED_STAT -&gt; :
+732     *  |--IDENT -&gt; outer
+733     *  `--LITERAL_WHILE -&gt; while
+734     *      |--LPAREN -&gt; (
+735     *      |--EXPR -&gt; EXPR
+736     *      |   `--LT -&gt; &lt;
+737     *      |       |--IDENT -&gt; i
+738     *      |       `--NUM_INT -&gt; 10
+739     *      |--RPAREN -&gt; )
+740     *      `--SLIST -&gt; {
+741     *          |--LITERAL_IF -&gt; if
+742     *          |   |--LPAREN -&gt; (
+743     *          |   |--EXPR -&gt; EXPR
+744     *          |   |   `--EQUAL -&gt; ==
+745     *          |   |       |--IDENT -&gt; i
+746     *          |   |       `--NUM_INT -&gt; 5
+747     *          |   |--RPAREN -&gt; )
+748     *          |   `--LITERAL_CONTINUE -&gt; continue
+749     *          |       |--IDENT -&gt; outer
+750     *          |       `--SEMI -&gt; ;
+751     *          |--EXPR -&gt; EXPR
+752     *          |   `--POST_INC -&gt; ++
+753     *          |       `--IDENT -&gt; i
+754     *          |--SEMI -&gt; ;
+755     *          `--RCURLY -&gt; }
+756     * </pre>
      *
      * @see #MODIFIERS
      * @see #TYPE
@@ -1858,9 +1863,43 @@ public final class TokenTypes {
         JavaLanguageLexer.LITERAL_TRANSIENT;
 
     /**
-     * The {@code native} keyword.
-     *
+     * The {@code native} keyword. When a method is marked as native, 
+     * it cannot have a body and must ends with a semicolon instead.
+     * 
+     * <p>For example:</p>
+     * <pre>
+     * public native void fastCopyFile(String sourceFile, String destFile);
+     * </pre>
+     * <p>parses as:</p>
+     * 
+     *  <pre>
+     *  |--LITERAL_NATIVE -&gt; native
+     * --MODIFIERS -&gt; MODIFIERS
+     *  |   `--LITERAL_PUBLIC -&gt; public
+     *  |--TYPE -&gt; TYPE
+     *  |   `--LITERAL_VOID -&gt; void
+     *  --IDENT -&gt; fastCopyFile
+     *  |--LPAREN -&gt; (
+     *  |--TYPE -&gt; TYPE
+     *  |   |   `--IDENT -&gt; String
+     *  |   |--IDENT -&gt; sourceFile
+     * --COMMA -&gt; ,
+     * --TYPE -&gt; TYPE
+     *  |   |   `--IDENT -&gt; String
+     *  |   |--IDENT -&gt; destFile
+     *  |--RPAREN -&gt; )
+     *  `--SEMI -&gt; ;
+     * </pre>
+     * 
      * @see #MODIFIERS
+     * @see #LPAREN
+     * @see #EXPR
+     * @see #RPAREN
+     * @see #RCURLY
+     * @see #COMMA
+     * @see #SEMI
+     * @see #IDENT
+     * @see #LITERAL_PUBLIC
      **/
     public static final int LITERAL_NATIVE =
         JavaLanguageLexer.LITERAL_NATIVE;
@@ -2203,7 +2242,9 @@ public final class TokenTypes {
      *  |   |   `--NUM_INT -&gt; 1
      *  |   |--COMMA -&gt; ,
      *  |   `--EXPR -&gt; EXPR
-     *  |       `--STRING_LITERAL -&gt; "NULL"
+     *  |       `--
+
+_LITERAL -&gt; "NULL"
      *  |--RPAREN -&gt; )
      *  `--SEMI -&gt; ;
      * </pre>
@@ -2534,12 +2575,62 @@ public final class TokenTypes {
      */
     public static final int DO_WHILE = JavaLanguageLexer.DO_WHILE;
     /**
-     * The {@code break} keyword.  The first child is an optional
-     * identifier and the last child is a semicolon.
+     * The {@code break}
+     * keyword.A Java break statement halts the execution
+     * of a loop. When a break statement is run, a program  
+     * starts to run the code after a statement. 
+     *  
+     * <p>For example</p>
+     *<pre>
+     *for(int i=0;i<10;i++)
+     *{ 
+     *   if(i==2)
+     *   {
+     *   break;
+     *   }
+     *   }
+     *   
+     *<pre>
      *
+     *LITERAL_FOR -&gt; for
+     * |--LPAREN -&gt; (
+     * |--LITERAL_INT -&gt; int
+     *  --IDENT -&gt; i=0
+     *  --SEMI -&gt; ;
+     * |--IDENT -&gt; i
+     * |`--LT -&gt; &lt; 10
+     *  --SEMI -&gt; ;
+     * --EXPR -&gt; EXPR
+     * |`--INC -&gt; ++
+     * |`--IDENT -&gt; i
+     * |--RPAREN -&gt; )
+     * --SLIST -&gt; {
+     * 
+     * 
+     * LITERAL_IF -&gt; if
+     * --LPAREN -&gt; (
+     * `--IDENT -&gt; i
+     * --EXPR -&gt; EXPR
+     * |   `--EQUAL -&gt; == 2
+     * |--RPAREN -&gt; )
+     * --SLIST -&gt; {
+     * LITERAL_BREAK -&gt; break
+     * --SEMI -&gt; ;
+     * `--RCURLY -&gt; }
+     * `--RCURLY -&gt; }
+     * 
+     *</pre>
      * @see #IDENT
      * @see #SEMI
      * @see #SLIST
+     * @see #SEMI
+     * @see #RCURLY
+     * @see #LITERAL_BREAK
+     * @see #LITERAL_IF
+     * @see #LPAREN
+     * @see #RPAREN
+     * @see #INC
+     * @see #IDENT
      **/
     public static final int LITERAL_BREAK =
         JavaLanguageLexer.LITERAL_BREAK;
