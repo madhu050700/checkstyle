@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
-
+import java.util.stream.Collectors;
 import com.google.common.collect.Maps;
 import com.puppycrawl.tools.checkstyle.api.Configuration;
 import com.puppycrawl.tools.checkstyle.api.Violation;
@@ -413,10 +413,17 @@ public abstract class AbstractModuleTestSupport extends AbstractPathTestSupport 
                                   String file,
                                   List<TestInputViolation> testInputViolations)
             throws Exception {
-        final List<String> actualViolations = getActualViolationsForFile(config, file);
-        assertWithMessage("Number of actual and expected violations differ.")
-                .that(actualViolations)
-                .hasSize(testInputViolations.size());
+        final List<String> actualViolations = getActualViolationsForFile(config, file);  
+        final List<Integer> actualViolationLines = actualViolations.stream()
+                .map(violation -> violation.substring(0, violation.indexOf(':')))
+                .map(Integer::valueOf)
+                .collect(Collectors.toList());
+        final List<Integer> expectedViolationLines = testInputViolations.stream()
+                .map(TestInputViolation::getLineNo)
+                .collect(Collectors.toList());
+        assertWithMessage("Violation lines for %s differ.", file)
+                .that(actualViolationLines)
+                .isEqualTo(expectedViolationLines);        
         for (int index = 0; index < actualViolations.size(); index++) {
             assertWithMessage("Actual and expected violations differ.")
                     .that(actualViolations.get(index))
