@@ -1521,7 +1521,35 @@ public final class TokenTypes {
     /**
      * The {@code boolean} keyword.
      *
+     * <p>For example:</p>
+     * <pre>
+     * public class MyClass{
+     * 	 public boolean x;
+     * }
+     * </pre>
+     * <p>parses as:</p>
+     * <pre>
+     *  CLASS_DEF -&gt; CLASS_DEF
+     * |--MODIFIERS -&gt; MODIFIERS
+     * 		`----LITERAL_PUBLIC -&gt; public
+     * |--LITERAL_CLASS -&gt; class
+     * |--IDENT -&gt; MyClass
+     * `--OBJBLOCK -&gt; OBJBLOCK
+     *     |--LCURLY -&gt; {
+     *     |--VARIABLE_DEF -&gt; VARIABLE_DEF
+     *     |   |--MODIFIERS -&gt; MODIFIERS
+     *     |   |   `--LITERAL_PUBLIC -&gt; public
+     *     |   |--TYPE -&gt; TYPE
+     *     |   |   `--LITERAL_INT -&gt; boolean
+     *     |   |--IDENT -&gt; x
+     *     |   `--SEMI -&gt; ;
+     *     `--RCURLY -&gt; }
+     * </pre>
      * @see #TYPE
+     * @see #MODIFIERS
+     * @see #SEMI
+     * @see #RCURLY
+     * @see #LCURLY
      **/
     public static final int LITERAL_BOOLEAN =
         JavaLanguageLexer.LITERAL_BOOLEAN;
@@ -1531,7 +1559,7 @@ public final class TokenTypes {
      *
      * <p>For example:</p>
      * <pre>
-     * boolean x  = true;
+     * public byte x;
      * </pre>
      * <p>parses as:</p>
      * <pre>
@@ -1539,12 +1567,13 @@ public final class TokenTypes {
      *  |--MODIFIERS -&gt; MODIFIERS
      *  |   `--LITERAL_PUBLIC -&gt; public
      *  |--TYPE -&gt; TYPE
-     *  |   `--LITERAL_BOOLEAN -&gt; byte
+     *  |   `--LITERAL_BYTE -&gt; byte
      *  |--IDENT -&gt; x
      *  `--SEMI -&gt; ;
      * </pre>
-     *
+     * 
      * @see #TYPE
+     * 
      **/
     public static final int LITERAL_BYTE =
         JavaLanguageLexer.LITERAL_BYTE;
