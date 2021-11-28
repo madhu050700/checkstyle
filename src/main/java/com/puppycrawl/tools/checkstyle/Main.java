@@ -706,7 +706,7 @@ public final class Main {
                 description = "Specifies the output format. Valid values: "
                 + "${COMPLETION-CANDIDATES} for XMLLogger, SarifLogger, "
                 + "and DefaultLogger respectively. Defaults to ${DEFAULT-VALUE}.")
-        private OutputFormat format = DEFAULT_OUTPUT_FORMAT;
+        private final OutputFormat format = DEFAULT_OUTPUT_FORMAT;
 
         /** Option that controls whether to print the AST of the file. */
         @Option(names = {"-t", "--tree"},
