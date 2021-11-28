@@ -767,7 +767,7 @@ public final class Main {
         @Option(names = {"-x", "--exclude-regexp"},
                 description = "Directory/file pattern to exclude from CheckStyle. Multiple "
                         + "excludes are allowed.")
-        private List<Pattern> excludeRegex = new ArrayList<>();
+        private final List<Pattern> excludeRegex = new ArrayList<>();
 
         /** Switch whether to execute ignored modules or not. */
         @Option(names = {"-E", "--executeIgnoredModules"},
