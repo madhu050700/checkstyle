@@ -756,7 +756,7 @@ public final class Main {
                 description = "Directory/file to exclude from CheckStyle. The path can be the "
                         + "full, absolute path, or relative to the current path. Multiple "
                         + "excludes are allowed.")
-        private List<File> exclude = new ArrayList<>();
+        private final List<File> exclude = new ArrayList<>();
 
         /**
          * Option that allows users to specify a regex of paths to exclude.
