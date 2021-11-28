@@ -126,16 +126,15 @@ public class MultipleVariableDeclarationsCheck extends AbstractCheck {
             if (nextNode != null
                     && nextNode.getType() == TokenTypes.VARIABLE_DEF) {
                 final DetailAST firstNode = CheckUtil.getFirstNode(ast);
-                if (isCommaSeparated) {
-                    // Check if the multiple variable declarations are in a
+                // Check if the multiple variable declarations are in a
                     // for loop initializer. If they are, then no warning
                     // should be displayed. Declaring multiple variables in
                     // a for loop initializer is a good way to minimize
                     // variable scope. Refer Feature Request Id - 2895985
                     // for more details
-                    if (ast.getParent().getType() != TokenTypes.FOR_INIT) {
-                        log(firstNode, MSG_MULTIPLE_COMMA);
-                    }
+                if (isCommaSeparated && ast.getParent().getType() != TokenTypes.FOR_INIT) {    
+                    log(firstNode, MSG_MULTIPLE_COMMA);
+                    
                 }
                 else {
                     final DetailAST lastNode = getLastNode(ast);
