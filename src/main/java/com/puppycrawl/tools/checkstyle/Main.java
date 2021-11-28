@@ -685,7 +685,7 @@ public final class Main {
         @Option(names = {"-w", "--tabWidth"},
                 description = "Sets the length of the tab character. "
                 + "Used only with -s option. Default value is ${DEFAULT-VALUE}.")
-        private int tabWidth = CommonUtil.DEFAULT_TAB_WIDTH;
+        private final int tabWidth = CommonUtil.DEFAULT_TAB_WIDTH;
 
         /** Switch whether to generate suppressions file or not. */
         @Option(names = {"-g", "--generate-xpath-suppression"},

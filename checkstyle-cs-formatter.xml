@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles version="10">
+   <profile kind="CodeFormatterProfile"
+            name="CheckStyle-Generated checkstyle"
+            version="10"/>
+</profiles>
