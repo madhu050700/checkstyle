@@ -106,9 +106,10 @@ public final class Main {
      **/
     public static void main(String... args) throws IOException {
 
+    	FileDescription fd = null;
         final CliOptions cliOptions = new CliOptions();
         final CommandLine commandLine = new CommandLine(cliOptions);
-        commandLine.setUsageHelpWidth(CliOptions.HELP_WIDTH);
+        commandLine.setUsageHelpWidth(fd.HELP_WIDTH);
         commandLine.setCaseInsensitiveEnumValuesAllowed(true);
 
         // provide proper exit code based on results.
@@ -203,7 +204,8 @@ public final class Main {
         final List<Pattern> patternsToExclude = options.getExclusions();
 
         final List<File> result = new LinkedList<>();
-        for (File file : options.files) {
+        FileDescription fd = null;
+		for (File file : fd.files) {
             result.addAll(listFiles(file, patternsToExclude));
         }
         return result;
@@ -276,7 +278,8 @@ public final class Main {
     private static int runCli(CliOptions options, List<File> filesToProcess)
             throws IOException, CheckstyleException {
         int result = 0;
-        final boolean hasSuppressionLineColumnNumber = options.suppressionLineColumnNumber != null;
+        FileDescription fd = null;
+		final boolean hasSuppressionLineColumnNumber = fd.suppressionLineColumnNumber != null;
 
         // create config helper object
         if (options.printAst) {
@@ -310,7 +313,7 @@ public final class Main {
             final File file = filesToProcess.get(0);
             final String stringSuppressions =
                     SuppressionsStringPrinter.printSuppressions(file,
-                            options.suppressionLineColumnNumber, options.tabWidth);
+                            fd.suppressionLineColumnNumber, fd.tabWidth);
             System.out.print(stringSuppressions);
         }
         else {
@@ -351,17 +354,19 @@ public final class Main {
         // setup the properties
         final Properties props;
 
-        if (options.propertiesFile == null) {
+        FileDescription fd = null;
+		if (fd.propertiesFile == null) {
             props = System.getProperties();
         }
         else {
-            props = loadProperties(options.propertiesFile);
+            props = loadProperties(fd.propertiesFile);
         }
 
-        // create a configuration
+        FileDescription fd1 = null;
+		// create a configuration
         final ThreadModeSettings multiThreadModeSettings =
-                new ThreadModeSettings(CliOptions.CHECKER_THREADS_NUMBER,
-                        CliOptions.TREE_WALKER_THREADS_NUMBER);
+                new ThreadModeSettings(fd1.THREAD_COUNT,
+                        fd1.THREAD_COUNT);
 
         final ConfigurationLoader.IgnoredModulesOptions ignoredModulesOptions;
         if (options.executeIgnoredModules) {
@@ -372,7 +377,7 @@ public final class Main {
         }
 
         final Configuration config = ConfigurationLoader.loadConfiguration(
-                options.configurationFile, new PropertiesExpander(props),
+                fd1.configurationFile, new PropertiesExpander(props),
                 ignoredModulesOptions, multiThreadModeSettings);
 
         // create RootModule object and run it
@@ -380,25 +385,26 @@ public final class Main {
         final ClassLoader moduleClassLoader = Checker.class.getClassLoader();
         final RootModule rootModule = getRootModule(config.getName(), moduleClassLoader);
 
+        boolean generateXpathSuppressionsFile = false;
         try {
             final AuditListener listener;
-            if (options.generateXpathSuppressionsFile) {
+            if (generateXpathSuppressionsFile) {
                 // create filter to print generated xpath suppressions file
                 final Configuration treeWalkerConfig = getTreeWalkerConfig(config);
                 if (treeWalkerConfig != null) {
                     final DefaultConfiguration moduleConfig =
                             new DefaultConfiguration(
                                     XpathFileGeneratorAstFilter.class.getName());
-                    moduleConfig.addProperty(CliOptions.ATTRIB_TAB_WIDTH_NAME,
-                            String.valueOf(options.tabWidth));
+                    moduleConfig.addProperty(fd1.ATTRIB_TAB_WIDTH_NAME,
+                            String.valueOf(fd.tabWidth));
                     ((DefaultConfiguration) treeWalkerConfig).addChild(moduleConfig);
                 }
 
-                listener = new XpathFileGeneratorAuditListener(getOutputStream(options.outputPath),
-                        getOutputStreamOptions(options.outputPath));
+                listener = new XpathFileGeneratorAuditListener(getOutputStream(fd1.outputPath),
+                        getOutputStreamOptions(fd1.outputPath));
             }
             else {
-                listener = createListener(options.format, options.outputPath);
+                listener = createListener(options.format, fd1.outputPath);
             }
 
             rootModule.setModuleClassLoader(moduleClassLoader);
@@ -613,100 +619,27 @@ public final class Main {
     private static class CliOptions {
 
         /** Width of CLI help option. */
-        private static final int HELP_WIDTH = 100;
+      
 
-        /** The default number of threads to use for checker and the tree walker. */
-        private static final int DEFAULT_THREAD_COUNT = 1;
+         
+      
+     
 
-        /** Name for the moduleConfig attribute 'tabWidth'. */
-        private static final String ATTRIB_TAB_WIDTH_NAME = "tabWidth";
+        
 
-        /** Default output format. */
-        private static final OutputFormat DEFAULT_OUTPUT_FORMAT = OutputFormat.PLAIN;
-
-        /** Option name for output format. */
-        private static final String OUTPUT_FORMAT_OPTION = "-f";
-
-        /**
-         * The checker threads number.
-         * Suppression: CanBeFinal - we use picocli and it use  reflection to manage such fields
-         * This option has been skipped for CLI options intentionally.
-         *
-         * @noinspection CanBeFinal
-         */
-        private static final int CHECKER_THREADS_NUMBER = DEFAULT_THREAD_COUNT;
-
-        /**
-         * The tree walker threads number.
-         * Suppression: CanBeFinal - we use picocli and it use  reflection to manage such fields
-         * This option has been skipped for CLI options intentionally.
-         *
-         * @noinspection CanBeFinal
-         */
-        private static final int TREE_WALKER_THREADS_NUMBER = DEFAULT_THREAD_COUNT;
-
-        /** List of file to validate. */
-        @Parameters(arity = "1..*", description = "One or more source files to verify")
-        private List<File> files;
-
-        /** Config file location. */
-        @Option(names = "-c", description = "Specifies the location of the file that defines"
-                + " the configuration modules. The location can either be a filesystem location"
-                + ", or a name passed to the ClassLoader.getResource() method.")
-        private String configurationFile;
-
-        /** Output file location. */
-        @Option(names = "-o", description = "Sets the output file. Defaults to stdout.")
-        private Path outputPath;
-
-        /** Properties file location. */
-        @Option(names = "-p", description = "Sets the property files to load.")
-        private File propertiesFile;
-
-        /** LineNo and columnNo for the suppression. */
-        @Option(names = "-s",
-                description = "Prints xpath suppressions at the file's line and column position. "
-                        + "Argument is the line and column number (separated by a : ) in the file "
-                        + "that the suppression should be generated for. The option cannot be used "
-                        + "with other options and requires exactly one file to run on to be "
-                        + "specified. ATTENTION: generated result will have few queries, joined "
-                        + "by pipe(|). Together they will match all AST nodes on "
-                        + "specified line and column. You need to choose only one and recheck "
-                        + "that it works. Usage of all of them is also ok, but might result in "
-                        + "undesirable matching and suppress other issues.")
-        private String suppressionLineColumnNumber;
-
-        /**
-         * Tab character length.
-         * Suppression: CanBeFinal - we use picocli and it use  reflection to manage such fields
-         *
-         * @noinspection CanBeFinal
-         */
-        @Option(names = {"-w", "--tabWidth"},
-                description = "Sets the length of the tab character. "
-                + "Used only with -s option. Default value is ${DEFAULT-VALUE}.")
-        private int tabWidth = CommonUtil.DEFAULT_TAB_WIDTH;
-
-        /** Switch whether to generate suppressions file or not. */
-        @Option(names = {"-g", "--generate-xpath-suppression"},
-                description = "Generates to output a suppression xml to use to suppress all "
-                        + "violations from user's config. Instead of printing every violation, "
-                        + "all violations will be catched and single suppressions xml file will "
-                        + "be printed out. Used only with -c option. Output "
-                        + "location can be specified with -o option.")
-        private boolean generateXpathSuppressionsFile;
-
+       
         /**
          * Output format.
          * Suppression: CanBeFinal - we use picocli and it use  reflection to manage such fields
          *
          * @noinspection CanBeFinal
          */
+        FileDescription fd;
         @Option(names = "-f",
                 description = "Specifies the output format. Valid values: "
                 + "${COMPLETION-CANDIDATES} for XMLLogger, SarifLogger, "
                 + "and DefaultLogger respectively. Defaults to ${DEFAULT-VALUE}.")
-        private OutputFormat format = DEFAULT_OUTPUT_FORMAT;
+        private OutputFormat format =fd.DEFAULT_OUTPUT_FORMAT;
 
         /** Option that controls whether to print the AST of the file. */
         @Option(names = {"-t", "--tree"},
@@ -804,8 +737,8 @@ public final class Main {
         // -@cs[CyclomaticComplexity] Breaking apart will damage encapsulation
         private List<String> validateCli(ParseResult parseResult, List<File> filesToProcess) {
             final List<String> result = new ArrayList<>();
-            final boolean hasConfigurationFile = configurationFile != null;
-            final boolean hasSuppressionLineColumnNumber = suppressionLineColumnNumber != null;
+            final boolean hasConfigurationFile = fd.configurationFile != null;
+            final boolean hasSuppressionLineColumnNumber = fd.suppressionLineColumnNumber != null;
 
             if (filesToProcess.isEmpty()) {
                 result.add("Files to process must be specified, found 0.");
@@ -813,9 +746,9 @@ public final class Main {
             // ensure there is no conflicting options
             else if (printAst || printAstWithComments || printJavadocTree || printTreeWithJavadoc
                 || xpath != null) {
-                if (suppressionLineColumnNumber != null || configurationFile != null
-                        || propertiesFile != null || outputPath != null
-                        || parseResult.hasMatchedOption(OUTPUT_FORMAT_OPTION)) {
+                if (fd.suppressionLineColumnNumber != null || fd.configurationFile != null
+                        || fd.propertiesFile != null || fd.outputPath != null
+                        || parseResult.hasMatchedOption(fd.OUTPUT_FORMAT_OPTION)) {
                     result.add("Option '-t' cannot be used with other options.");
                 }
                 else if (filesToProcess.size() > 1) {
@@ -823,9 +756,9 @@ public final class Main {
                 }
             }
             else if (hasSuppressionLineColumnNumber) {
-                if (configurationFile != null || propertiesFile != null
-                        || outputPath != null
-                        || parseResult.hasMatchedOption(OUTPUT_FORMAT_OPTION)) {
+                if (fd.configurationFile != null || fd.propertiesFile != null
+                        || fd.outputPath != null
+                        || parseResult.hasMatchedOption(fd.OUTPUT_FORMAT_OPTION)) {
                     result.add("Option '-s' cannot be used with other options.");
                 }
                 else if (filesToProcess.size() > 1) {
@@ -835,11 +768,11 @@ public final class Main {
             else if (hasConfigurationFile) {
                 try {
                     // test location only
-                    CommonUtil.getUriByFilename(configurationFile);
+                    CommonUtil.getUriByFilename(fd.configurationFile);
                 }
                 catch (CheckstyleException ignored) {
                     final String msg = "Could not find config XML file '%s'.";
-                    result.add(String.format(Locale.ROOT, msg, configurationFile));
+                    result.add(String.format(Locale.ROOT, msg, fd.configurationFile));
                 }
                 result.addAll(validateOptionalCliParametersIfConfigDefined());
             }
@@ -857,9 +790,9 @@ public final class Main {
          */
         private List<String> validateOptionalCliParametersIfConfigDefined() {
             final List<String> result = new ArrayList<>();
-            if (propertiesFile != null && !propertiesFile.exists()) {
+            if (fd.propertiesFile != null && !fd.propertiesFile.exists()) {
                 result.add(String.format(Locale.ROOT,
-                        "Could not find file '%s'.", propertiesFile));
+                        "Could not find file '%s'.", fd.propertiesFile));
             }
             return result;
         }

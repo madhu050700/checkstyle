@@ -580,6 +580,19 @@
                     <execute />
                   </action>
                 </pluginExecution>
+                <pluginExecution>
+                	<pluginExecutionFilter>
+                		<groupId>org.codehaus.mojo</groupId>
+                		<artifactId>exec-maven-plugin</artifactId>
+                		<versionRange>[3.0.0,)</versionRange>
+                		<goals>
+                			<goal>java</goal>
+                		</goals>
+                	</pluginExecutionFilter>
+                	<action>
+                		<ignore></ignore>
+                	</action>
+                </pluginExecution>
               </pluginExecutions>
             </lifecycleMappingMetadata>
           </configuration>
@@ -3479,4 +3492,14 @@
       </build>
     </profile>
   </profiles>
+  
+  <dependencies>
+  <dependency>
+  <groupId>jakarta.xml.bind</groupId>
+  <artifactId>jakarta.xml.bind-api</artifactId>
+  <version>2.3.3</version>
+  </dependency>
+  
+  </dependencies>
+  
 </project>

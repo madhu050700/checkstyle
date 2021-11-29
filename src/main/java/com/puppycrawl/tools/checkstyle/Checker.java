@@ -63,15 +63,8 @@ import com.puppycrawl.tools.checkstyle.utils.CommonUtil;
  */
 public class Checker extends AutomaticBean implements MessageDispatcher, RootModule {
 
+	ErrorCheck errorcheck;
     /** Message to use when an exception occurs and should be printed as a violation. */
-    public static final String EXCEPTION_MSG = "general.exception";
-
-    /** Logger for Checker. */
-    private final Log log;
-
-    /** Maintains error count. */
-    private final SeverityLevelCounter counter = new SeverityLevelCounter(
-            SeverityLevel.ERROR);
 
     /** Vector of listeners. */
     private final List<AuditListener> listeners = new ArrayList<>();
@@ -80,8 +73,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
     private final List<FileSetCheck> fileSetChecks = new ArrayList<>();
 
     /** The audit event before execution file filters. */
-    private final BeforeExecutionFileFilterSet beforeExecutionFileFilters =
-            new BeforeExecutionFileFilterSet();
+    
 
     /** The audit event filters. */
     private final FilterSet filters = new FilterSet();
@@ -89,11 +81,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
     /** The basedir to strip off in file names. */
     private String basedir;
 
-    /** Locale country to report messages . **/
-    private String localeCountry = Locale.getDefault().getCountry();
-    /** Locale language to report messages . **/
-    private String localeLanguage = Locale.getDefault().getLanguage();
-
+    
     /** The factory for instantiating submodules. */
     private ModuleFactory moduleFactory;
 
@@ -106,17 +94,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
     /** The file extensions that are accepted. */
     private String[] fileExtensions = CommonUtil.EMPTY_STRING_ARRAY;
 
-    /**
-     * The severity level of any violations found by submodules.
-     * The value of this property is passed to submodules via
-     * contextualize().
-     *
-     * <p>Note: Since the Checker is merely a container for modules
-     * it does not make sense to implement logging functionality
-     * here. Consequently Checker does not extend AbstractViolationReporter,
-     * leading to a bit of duplicated code for severity level setting.
-     */
-    private SeverityLevel severity = SeverityLevel.ERROR;
+    
 
     /** Name of a charset. */
     private String charset = StandardCharsets.UTF_8.name();
@@ -135,8 +113,8 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * The instance needs to be contextualized and configured.
      */
     public Checker() {
-        addListener(counter);
-        log = LogFactory.getLog(Checker.class);
+        addListener(errorcheck.counter);
+        errorcheck.log = LogFactory.getLog(Checker.class);
     }
 
     /**
@@ -157,7 +135,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * @param filter before execution file filter to remove.
      */
     public void removeBeforeExecutionFileFilter(BeforeExecutionFileFilter filter) {
-        beforeExecutionFileFilters.removeBeforeExecutionFileFilter(filter);
+    	errorcheck.beforeExecutionFileFilters.removeBeforeExecutionFileFilter(filter);
     }
 
     /**
@@ -173,7 +151,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
     public void destroy() {
         listeners.clear();
         fileSetChecks.clear();
-        beforeExecutionFileFilters.clear();
+        errorcheck.beforeExecutionFileFilters.clear();
         filters.clear();
         if (cacheFile != null) {
             try {
@@ -227,7 +205,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
         // It may also log!!!
         fileSetChecks.forEach(FileSetCheck::destroy);
 
-        final int errorCount = counter.getCount();
+        final int errorCount = errorcheck.counter.getCount();
         fireAuditFinished();
         return errorCount;
     }
@@ -329,9 +307,9 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
             }
         }
         catch (final IOException ioe) {
-            log.debug("IOException occurred.", ioe);
+        	 errorcheck.log.debug("IOException occurred.", ioe);
             fileMessages.add(new Violation(1,
-                    Definitions.CHECKSTYLE_BUNDLE, EXCEPTION_MSG,
+                    Definitions.CHECKSTYLE_BUNDLE, errorcheck.EXCEPTION_MSG,
                     new String[] {ioe.getMessage()}, null, getClass(), null));
         }
         // -@cs[IllegalCatch] There is no other way to obey haltOnException field
@@ -340,7 +318,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
                 throw ex;
             }
 
-            log.debug("Exception occurred.", ex);
+            errorcheck.log.debug("Exception occurred.", ex);
 
             final StringWriter sw = new StringWriter();
             final PrintWriter pw = new PrintWriter(sw, true);
@@ -348,7 +326,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
             ex.printStackTrace(pw);
 
             fileMessages.add(new Violation(1,
-                    Definitions.CHECKSTYLE_BUNDLE, EXCEPTION_MSG,
+                    Definitions.CHECKSTYLE_BUNDLE, errorcheck.EXCEPTION_MSG,
                     new String[] {sw.getBuffer().toString()},
                     null, getClass(), null));
         }
@@ -364,7 +342,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      */
     private boolean acceptFileStarted(String fileName) {
         final String stripped = CommonUtil.relativizeAndNormalizePath(basedir, fileName);
-        return beforeExecutionFileFilters.accept(stripped);
+        return errorcheck.beforeExecutionFileFilters.accept(stripped);
     }
 
     /**
@@ -421,9 +399,10 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
         }
     }
 
+    Location location;
     @Override
     protected void finishLocalSetup() throws CheckstyleException {
-        final Locale locale = new Locale(localeLanguage, localeCountry);
+        final Locale locale = new Locale(location.localeLanguage, location.localeCountry);
         Violation.setLocale(locale);
 
         if (moduleFactory == null) {
@@ -442,7 +421,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
         final DefaultContext context = new DefaultContext();
         context.add("charset", charset);
         context.add("moduleFactory", moduleFactory);
-        context.add("severity", severity.getName());
+        context.add("severity", errorcheck.severity.getName());
         context.add("basedir", basedir);
         context.add("tabWidth", String.valueOf(tabWidth));
         childContext = context;
@@ -512,7 +491,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * @param filter the additional filter
      */
     public void addBeforeExecutionFileFilter(BeforeExecutionFileFilter filter) {
-        beforeExecutionFileFilters.addBeforeExecutionFileFilter(filter);
+    	errorcheck.beforeExecutionFileFilters.addBeforeExecutionFileFilter(filter);
     }
 
     /**
@@ -569,7 +548,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * @param localeCountry the country to report messages
      */
     public void setLocaleCountry(String localeCountry) {
-        this.localeCountry = localeCountry;
+        this.location.localeCountry = localeCountry;
     }
 
     /**
@@ -578,7 +557,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * @param localeLanguage the language to report messages
      */
     public void setLocaleLanguage(String localeLanguage) {
-        this.localeLanguage = localeLanguage;
+        this.location.localeLanguage = localeLanguage;
     }
 
     /**
@@ -589,7 +568,7 @@ public class Checker extends AutomaticBean implements MessageDispatcher, RootMod
      * @see SeverityLevel
      */
     public final void setSeverity(String severity) {
-        this.severity = SeverityLevel.getInstance(severity);
+        this.errorcheck.severity = SeverityLevel.getInstance(severity);
     }
 
     @Override
