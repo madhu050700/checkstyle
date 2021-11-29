@@ -234,21 +234,37 @@ public final class ModifiedControlVariableCheck extends AbstractCheck {
                 // we need that Tokens only at leaveToken()
                 break;
             case TokenTypes.ASSIGN:
+            	break;
             case TokenTypes.PLUS_ASSIGN:
+            	break;
             case TokenTypes.MINUS_ASSIGN:
+            	break;
             case TokenTypes.STAR_ASSIGN:
+            	break;
             case TokenTypes.DIV_ASSIGN:
+            	break;
             case TokenTypes.MOD_ASSIGN:
+            	break;
             case TokenTypes.SR_ASSIGN:
+            	break;
             case TokenTypes.BSR_ASSIGN:
+            	break;
             case TokenTypes.SL_ASSIGN:
+            	break;
             case TokenTypes.BAND_ASSIGN:
+            	break;
             case TokenTypes.BXOR_ASSIGN:
+            	break;
             case TokenTypes.BOR_ASSIGN:
+            	break;
             case TokenTypes.INC:
+            	break;
             case TokenTypes.POST_INC:
+            	break;
             case TokenTypes.DEC:
+            	break;
             case TokenTypes.POST_DEC:
+            	break;
                 checkIdent(ast);
                 break;
             default:

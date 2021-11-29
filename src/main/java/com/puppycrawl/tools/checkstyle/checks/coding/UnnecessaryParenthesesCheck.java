@@ -320,10 +320,10 @@ public class UnnecessaryParenthesesCheck extends AbstractCheck {
         TokenTypes.LOR,
         TokenTypes.LAND,
         TokenTypes.LITERAL_INSTANCEOF,
-        TokenTypes.GT,
-        TokenTypes.LT,
-        TokenTypes.GE,
-        TokenTypes.LE,
+        TokenTypes.GreaterThan,
+        TokenTypes.LessThan,
+        TokenTypes.GreaterEqual,
+        TokenTypes.LessEqual,
         TokenTypes.EQUAL,
         TokenTypes.NOT_EQUAL,
     };
@@ -377,10 +377,10 @@ public class UnnecessaryParenthesesCheck extends AbstractCheck {
             TokenTypes.TEXT_BLOCK_LITERAL_BEGIN,
             TokenTypes.LAND,
             TokenTypes.LITERAL_INSTANCEOF,
-            TokenTypes.GT,
-            TokenTypes.LT,
-            TokenTypes.GE,
-            TokenTypes.LE,
+            TokenTypes.GreaterThan,
+            TokenTypes.LessThan,
+            TokenTypes.GreaterEqual,
+            TokenTypes.LessEqual,
             TokenTypes.EQUAL,
             TokenTypes.NOT_EQUAL,
             TokenTypes.UNARY_MINUS,
@@ -390,9 +390,9 @@ public class UnnecessaryParenthesesCheck extends AbstractCheck {
             TokenTypes.LNOT,
             TokenTypes.BNOT,
             TokenTypes.POST_INC,
-            TokenTypes.POST_DEC,
-        };
-    }
+            TokenTypes.POST_DEC
+    };
+}
 
     @Override
     public int[] getAcceptableTokens() {
@@ -423,10 +423,10 @@ public class UnnecessaryParenthesesCheck extends AbstractCheck {
             TokenTypes.TEXT_BLOCK_LITERAL_BEGIN,
             TokenTypes.LAND,
             TokenTypes.LITERAL_INSTANCEOF,
-            TokenTypes.GT,
-            TokenTypes.LT,
-            TokenTypes.GE,
-            TokenTypes.LE,
+            TokenTypes.GreaterThan,
+            TokenTypes.LessThan,
+            TokenTypes.GreaterEqual,
+            TokenTypes.LessEqual,
             TokenTypes.EQUAL,
             TokenTypes.NOT_EQUAL,
             TokenTypes.UNARY_MINUS,
@@ -528,7 +528,7 @@ public class UnnecessaryParenthesesCheck extends AbstractCheck {
     private static boolean isSurrounded(DetailAST ast) {
         // if previous sibling is left parenthesis,
         // next sibling can't be other than right parenthesis
-        final DetailAST prev = ast.getPreviousSibling();
+         DetailAST prev = ast.getPreviousSibling();
         return prev != null && prev.getType() == TokenTypes.LPAREN;
     }
 

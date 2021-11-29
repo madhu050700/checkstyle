@@ -187,8 +187,8 @@ public class NoCloneCheck extends AbstractCheck {
 
     @Override
     public void visitToken(DetailAST ast) {
-        final DetailAST mid = ast.findFirstToken(TokenTypes.IDENT);
-        final String name = mid.getText();
+        DetailAST mid = ast.findFirstToken(TokenTypes.IDENT);
+        String name = mid.getText();
 
         if ("clone".equals(name)) {
             final DetailAST params = ast.findFirstToken(TokenTypes.PARAMETERS);

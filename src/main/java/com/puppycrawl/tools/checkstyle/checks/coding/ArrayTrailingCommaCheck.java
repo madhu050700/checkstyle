@@ -234,8 +234,8 @@ public class ArrayTrailingCommaCheck extends AbstractCheck {
 
     @Override
     public void visitToken(DetailAST arrayInit) {
-        final DetailAST rcurly = arrayInit.findFirstToken(TokenTypes.RCURLY);
-        final DetailAST previousSibling = rcurly.getPreviousSibling();
+        DetailAST rcurly = arrayInit.findFirstToken(TokenTypes.RCURLY);
+        DetailAST previousSibling = rcurly.getPreviousSibling();
 
         if (arrayInit.getChildCount() != 1
                 && (alwaysDemandTrailingComma

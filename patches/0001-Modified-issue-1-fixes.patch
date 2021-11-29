@@ -1,0 +1,77 @@
+From 7703a27dc780cb6d3aab564fde002c89224ff92d Mon Sep 17 00:00:00 2001
+From:  <p.nimbekar@wsu.edu>
+Date: Mon, 25 Oct 2021 08:43:09 -0700
+Subject: [PATCH 2/2] Modified issue 1 fixes
+
+---
+ .../tools/checkstyle/api/TokenTypes.java      | 35 +++++++++++++++++--
+ 1 file changed, 32 insertions(+), 3 deletions(-)
+
+diff --git a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+index 97ac7db58..a3b87173a 100644
+--- a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
++++ b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+@@ -1521,7 +1521,35 @@ public final class TokenTypes {
+     /**
+      * The {@code boolean} keyword.
+      *
++     * <p>For example:</p>
++     * <pre>
++     * public class MyClass{
++     * 	 public boolean x;
++     * }
++     * </pre>
++     * <p>parses as:</p>
++     * <pre>
++     *  CLASS_DEF -&gt; CLASS_DEF
++     * |--MODIFIERS -&gt; MODIFIERS
++     * 		`----LITERAL_PUBLIC -&gt; public
++     * |--LITERAL_CLASS -&gt; class
++     * |--IDENT -&gt; MyClass
++     * `--OBJBLOCK -&gt; OBJBLOCK
++     *     |--LCURLY -&gt; {
++     *     |--VARIABLE_DEF -&gt; VARIABLE_DEF
++     *     |   |--MODIFIERS -&gt; MODIFIERS
++     *     |   |   `--LITERAL_PUBLIC -&gt; public
++     *     |   |--TYPE -&gt; TYPE
++     *     |   |   `--LITERAL_INT -&gt; boolean
++     *     |   |--IDENT -&gt; x
++     *     |   `--SEMI -&gt; ;
++     *     `--RCURLY -&gt; }
++     * </pre>
+      * @see #TYPE
++     * @see #MODIFIERS
++     * @see #SEMI
++     * @see #RCURLY
++     * @see #LCURLY
+      **/
+     public static final int LITERAL_BOOLEAN =
+         JavaLanguageLexer.LITERAL_BOOLEAN;
+@@ -1531,7 +1559,7 @@ public final class TokenTypes {
+      *
+      * <p>For example:</p>
+      * <pre>
+-     * boolean x  = true;
++     * public byte x;
+      * </pre>
+      * <p>parses as:</p>
+      * <pre>
+@@ -1539,12 +1567,13 @@ public final class TokenTypes {
+      *  |--MODIFIERS -&gt; MODIFIERS
+      *  |   `--LITERAL_PUBLIC -&gt; public
+      *  |--TYPE -&gt; TYPE
+-     *  |   `--LITERAL_BOOLEAN -&gt; byte
++     *  |   `--LITERAL_BYTE -&gt; byte
+      *  |--IDENT -&gt; x
+      *  `--SEMI -&gt; ;
+      * </pre>
+-     *
++     * 
+      * @see #TYPE
++     * 
+      **/
+     public static final int LITERAL_BYTE =
+         JavaLanguageLexer.LITERAL_BYTE;
+-- 
+2.24.1.windows.2
+

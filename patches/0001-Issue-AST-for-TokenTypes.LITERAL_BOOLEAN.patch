@@ -1,0 +1,34 @@
+From 6319b2d3865e8082575c16a55a3c83bde80fb684 Mon Sep 17 00:00:00 2001
+From:  <p.nimbekar@wsu.edu>
+Date: Sun, 24 Oct 2021 14:45:36 -0700
+Subject: [PATCH 1/2] Issue- AST for TokenTypes.LITERAL_BOOLEAN
+
+---
+ .../java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java  | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+index 7b9661da7..97ac7db58 100644
+--- a/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
++++ b/src/main/java/com/puppycrawl/tools/checkstyle/api/TokenTypes.java
+@@ -1531,7 +1531,7 @@ public final class TokenTypes {
+      *
+      * <p>For example:</p>
+      * <pre>
+-     * public byte x;
++     * boolean x  = true;
+      * </pre>
+      * <p>parses as:</p>
+      * <pre>
+@@ -1539,7 +1539,7 @@ public final class TokenTypes {
+      *  |--MODIFIERS -&gt; MODIFIERS
+      *  |   `--LITERAL_PUBLIC -&gt; public
+      *  |--TYPE -&gt; TYPE
+-     *  |   `--LITERAL_BYTE -&gt; byte
++     *  |   `--LITERAL_BOOLEAN -&gt; byte
+      *  |--IDENT -&gt; x
+      *  `--SEMI -&gt; ;
+      * </pre>
+-- 
+2.24.1.windows.2
+

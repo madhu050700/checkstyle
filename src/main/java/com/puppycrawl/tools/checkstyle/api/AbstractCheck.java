@@ -228,7 +228,7 @@ public abstract class AbstractCheck extends AbstractViolationReporter {
     @Override
     public final void log(int lineNo, int colNo, String key,
             Object... args) {
-        final int col = 1 + CommonUtil.lengthExpandedTabs(
+        int col = 1 + CommonUtil.lengthExpandedTabs(
             getLines()[lineNo - 1], colNo, tabWidth);
         context.get().violations.add(
             new Violation(

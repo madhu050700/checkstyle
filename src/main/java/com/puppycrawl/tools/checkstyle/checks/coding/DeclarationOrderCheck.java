@@ -433,8 +433,8 @@ public class DeclarationOrderCheck extends AbstractCheck {
      */
     private static Set<DetailAST> getAllTokensOfType(DetailAST ast, int tokenType) {
         DetailAST vertex = ast;
-        final Set<DetailAST> result = new HashSet<>();
-        final Deque<DetailAST> stack = new ArrayDeque<>();
+        Set<DetailAST> result = new HashSet<>();
+        Deque<DetailAST> stack = new ArrayDeque<>();
         while (vertex != null || !stack.isEmpty()) {
             if (!stack.isEmpty()) {
                 vertex = stack.pop();

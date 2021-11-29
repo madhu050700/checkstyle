@@ -71,7 +71,7 @@ public class AnnotationArrayInitHandler extends BlockParentHandler {
             offset = getBraceAdjustment();
         }
 
-        final IndentLevel level = new IndentLevel(getIndent(), offset);
+        IndentLevel level = new IndentLevel(getIndent(), offset);
         return IndentLevel.addAcceptable(level, level.getLastIndentLevel()
             + getLineWrappingIndentation());
     }
@@ -131,8 +131,8 @@ public class AnnotationArrayInitHandler extends BlockParentHandler {
      */
     private int getNextFirstNonBlankOnLineAfter(int lineNo, int columnNo) {
         int realColumnNo = columnNo + 1;
-        final String line = getIndentCheck().getLines()[lineNo - 1];
-        final int lineLength = line.length();
+        String line = getIndentCheck().getLines()[lineNo - 1];
+        int lineLength = line.length();
         while (realColumnNo < lineLength
             && Character.isWhitespace(line.charAt(realColumnNo))) {
             realColumnNo++;

@@ -978,7 +978,7 @@ public final class TokenTypes {
      * declaration or inline with {@code new}.
      *
      * <p>For example:</p>
-     * <pre>
+     * <pre>s
      *   int[] y =
      *     {
      *       1,
@@ -3571,7 +3571,7 @@ public final class TokenTypes {
      *
      * @see #EXPR
      **/
-    public static final int LT = JavaLanguageLexer.LT;
+    public static final int LessThan = JavaLanguageLexer.LessThan;
     /**
      * The {@code >} (greater than) operator.
      *
@@ -3592,7 +3592,7 @@ public final class TokenTypes {
      *
      * @see #EXPR
      **/
-    public static final int GT = JavaLanguageLexer.GT;
+    public static final int GreaterThan = JavaLanguageLexer.GreaterThan;
     /**
      * The {@code <=} (less than or equal) operator.
      *
@@ -3613,13 +3613,14 @@ public final class TokenTypes {
      *
      * @see #EXPR
      **/
-    public static final int LE = JavaLanguageLexer.LE;
+    public static final int LessEqual = JavaLanguageLexer.LessThanOrEqual;
+    
     /**
      * The {@code >=} (greater than or equal) operator.
      *
      * @see #EXPR
      **/
-    public static final int GE = JavaLanguageLexer.GE;
+    public static final int GreaterEqual = JavaLanguageLexer.GreaterThanOrEqual;
     /**
      * The {@code instanceof} operator.  The first child is an
      * object reference or something that evaluates to an object
@@ -5579,6 +5580,7 @@ public final class TokenTypes {
      */
     public static final int SWITCH_RULE =
             JavaLanguageLexer.SWITCH_RULE;
+    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
 
     /**
      * The {@code non-sealed} keyword.  This element appears
@@ -5726,8 +5728,7 @@ public final class TokenTypes {
     /** Prevent instantiation. */
     private TokenTypes() {
     }
-    public static final int DOUBLE_COLON = JavaLanguageLexer.DOUBLE_COLON;
-
+   
     /**
      * A separator. 
      * It is used for method reference

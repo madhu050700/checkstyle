@@ -362,9 +362,9 @@ public class JavadocTypeCheck
     @Override
     public void visitToken(DetailAST ast) {
         if (shouldCheck(ast)) {
-            final FileContents contents = getFileContents();
-            final int lineNo = ast.getLineNo();
-            final TextBlock textBlock = contents.getJavadocBefore(lineNo);
+            FileContents contents = getFileContents();
+            int lineNo = ast.getLineNo();
+            TextBlock textBlock = contents.getJavadocBefore(lineNo);
             if (textBlock != null) {
                 final List<JavadocTag> tags = getJavadocTags(textBlock);
                 if (ScopeUtil.isOuterMostType(ast)) {
@@ -402,9 +402,9 @@ public class JavadocTypeCheck
      * @param ast a given node.
      * @return whether we should check a given node.
      */
-    private boolean shouldCheck(DetailAST ast) {
-        final Scope customScope = ScopeUtil.getScope(ast);
-        final Scope surroundingScope = ScopeUtil.getSurroundingScope(ast);
+    public boolean shouldCheck(DetailAST ast) {
+        Scope customScope = ScopeUtil.getScope(ast);
+        Scope surroundingScope = ScopeUtil.getSurroundingScope(ast);
 
         return customScope.isIn(scope)
             && (surroundingScope == null || surroundingScope.isIn(scope))

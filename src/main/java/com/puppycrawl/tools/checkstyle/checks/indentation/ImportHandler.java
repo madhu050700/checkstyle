@@ -43,13 +43,13 @@ public class ImportHandler extends AbstractExpressionHandler {
 
     @Override
     public void checkIndentation() {
-        final int columnNo = expandedTabsColumnNo(getMainAst());
+        int columnNo = expandedTabsColumnNo(getMainAst());
 
         if (!getIndent().isAcceptable(columnNo) && isOnStartOfLine(getMainAst())) {
             logError(getMainAst(), "", columnNo);
         }
 
-        final DetailAST semi = getMainAst().findFirstToken(TokenTypes.SEMI);
+        DetailAST semi = getMainAst().findFirstToken(TokenTypes.SEMI);
 
         checkWrappingIndentation(getMainAst(), semi);
     }

@@ -122,7 +122,7 @@ public class ClassTypeParameterNameCheck
 
     @Override
     protected final boolean mustCheckName(DetailAST ast) {
-        final DetailAST location =
+        DetailAST location =
             ast.getParent().getParent();
         return location.getType() == TokenTypes.CLASS_DEF;
     }

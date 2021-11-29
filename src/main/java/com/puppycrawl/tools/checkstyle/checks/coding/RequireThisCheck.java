@@ -1069,8 +1069,8 @@ public class RequireThisCheck extends AbstractCheck {
     private static Set<DetailAST> getAllTokensWhichAreEqualToCurrent(DetailAST ast, DetailAST token,
                                                                      int endLineNumber) {
         DetailAST vertex = ast;
-        final Set<DetailAST> result = new HashSet<>();
-        final Deque<DetailAST> stack = new ArrayDeque<>();
+        Set<DetailAST> result = new HashSet<>();
+        Deque<DetailAST> stack = new ArrayDeque<>();
         while (vertex != null || !stack.isEmpty()) {
             if (!stack.isEmpty()) {
                 vertex = stack.pop();

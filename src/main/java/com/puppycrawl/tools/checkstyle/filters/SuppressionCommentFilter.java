@@ -486,7 +486,7 @@ public class SuppressionCommentFilter
         if (event.getViolation() != null) {
             // Lazy update. If the first event for the current file, update file
             // contents and tag suppressions
-            final FileContents currentContents = event.getFileContents();
+            FileContents currentContents = event.getFileContents();
 
             if (getFileContents() != currentContents) {
                 setFileContents(currentContents);
@@ -773,7 +773,7 @@ public class SuppressionCommentFilter
          * @return true if the {@link TreeWalkerAuditEvent} source name matches the check format.
          */
         private boolean isCheckMatch(TreeWalkerAuditEvent event) {
-            final Matcher checkMatcher = tagCheckRegexp.matcher(event.getSourceName());
+            Matcher checkMatcher = tagCheckRegexp.matcher(event.getSourceName());
             return checkMatcher.find();
         }
 
@@ -790,7 +790,7 @@ public class SuppressionCommentFilter
                     match = false;
                 }
                 else {
-                    final Matcher idMatcher = tagIdRegexp.matcher(event.getModuleId());
+                    Matcher idMatcher = tagIdRegexp.matcher(event.getModuleId());
                     match = idMatcher.find();
                 }
             }
@@ -806,7 +806,7 @@ public class SuppressionCommentFilter
         private boolean isMessageMatch(TreeWalkerAuditEvent event) {
             boolean match = true;
             if (tagMessageRegexp != null) {
-                final Matcher messageMatcher = tagMessageRegexp.matcher(event.getMessage());
+                Matcher messageMatcher = tagMessageRegexp.matcher(event.getMessage());
                 match = messageMatcher.find();
             }
             return match;
